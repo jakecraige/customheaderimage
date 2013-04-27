@@ -1,0 +1,9 @@
+; $Id$
+name = Custom Header Image
+description = Stores a trail of previously visited pages.
+package = Build a Module
+core = 7.x
+configure = admin/config/customheaderimage
+files[] = customheaderimage.module
+files[] = customheaderimage.admin.inc
+files[] = customheaderimage_css_process.inc

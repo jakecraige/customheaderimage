@@ -1,0 +1,130 @@
+<?php
+
+/**
+* Implements hook_init().
+*/
+function customheaderimage_init() {
+	drupal_add_css(drupal_get_path('module', 'customheaderimage') .
+    	'/css/customheaderimage_style.css', array('group' => CSS_DEFAULT, 'every_page' => TRUE));
+  customheaderimage_add_rule('node/1', '/sites/default/files/bookpurchase_1.jpg');
+}
+
+/**
+ * Implements hook_menu().
+ */
+function customheaderimage_menu() {
+  // Module settings.
+  $items['admin/config/customheaderimage'] = array(
+    'title' => 'Custom Header Image',
+    'description' => 'Configuration for path specific header imagesn',
+    'page callback' => 'customheaderimage_display_pathspecific',
+    'access arguments' => array('administer customheaderimage'),
+    'file' => 'customheaderimage.admin.inc',
+    'file path' => drupal_get_path('module', 'customheaderimage'),
+  );
+  $items['admin/config/customheaderimage/default'] = array(
+    'title' => 'Path Specific',
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'weight' => -10,
+  );
+  $items['admin/config/customheaderimage/global'] = array(
+    'title' => 'Global',
+    'description' => 'Configuration for global default headers',
+    'type' => MENU_LOCAL_TASK,
+    'page callback' => 'customheaderimage_display_global',
+    'access arguments' => array('administer customheaderimage'),
+    'file' => 'customheaderimage.admin.inc',
+    'file path' => drupal_get_path('module', 'customheaderimage'),
+  );
+  $items['admin/config/customheaderimage/edit'] = array(
+    'title' => 'Edit',
+    'description' => 'Edit the header image associated with this path',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('customheaderimage_edit_image_form'),
+    'access callback' => TRUE,
+    'file' => 'customheaderimage.admin.inc',
+    'file path' => drupal_get_path('module', 'customheaderimage'),
+  );
+  return $items;
+}
+
+///////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+  function customheaderimage_add_rule($page_path, $image) {
+    $path = drupal_get_path('module', 'customheaderimage').'/css/customheaderimage_style.css';
+    //$file = fopen($path, 'c');
+    //$size = filesize($path);
+
+    // if(fwrite($file, 'cats')) {
+    //     drupal_set_message('Added CSS Style');
+    //   }
+    if(stristr($page_path, 'node')) {
+      //Set up page css styles
+      //page-node-2
+      $nid = customheaderimage_get_nid_from_path($page_path);
+      $class = "\n.page-node-".$nid;
+      $style = " #header { background-image: url('$image'); }";
+    }
+    else {
+      //Set up view css styles
+      //page-path-to-view
+    }
+    $image_path = customheaderimage_check_rule($class, $path);
+    if($image_path === FALSE) {
+      if(file_put_contents($path, $class.$style, FILE_APPEND)) {
+        drupal_set_message('Added CSS Style');
+      }
+      else {
+        drupal_set_message('Error adding CSS style', 'error');
+      }
+    }
+    else {
+      //rule already exists
+      //update path
+      dpm($image_path);
+    }
+  }
+  /**
+   * Checks if rule already exists by checking if the class already
+   * exists in the file
+   * @param  [string] $class [class to check]
+   * @return [string]        [img path]
+   */
+  function customheaderimage_check_rule($class, $file_path) {
+    $file = file_get_contents($file_path);
+    if(stristr($file, $class)) {
+      //File already has rule
+      ////.page-node-1 #header\{ background-image: url\('([a-z/_0-9.]+)
+      $string = preg_match(
+                  "|$class #header\{ background-image: url\('([a-z/_0-9.]+)|"
+                  , $file, $matches);
+      $image_path = $matches[1];
+      return $image_path;
+    }
+    return FALSE;
+  }
+
+  function customheaderimage_get_nid_from_path($string) {
+    $string = explode('/', $string);
+    $string = array_reverse($string);
+    return $string['0'];
+  }
+//////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////
+/**
+ * Implements hook_permission().
+ */
+function customheaderimage_permission() {
+  return array(
+    'administer customheaderimage' => array(
+      'title' => t('Administer Custom Header Images'),
+      'description' => t('Perform administration tasks for Custom Header Image module.'),
+    ),
+  );
+}
