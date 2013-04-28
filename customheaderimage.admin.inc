@@ -238,7 +238,7 @@ function customheaderimage_edit_image_form_submit($form, &$form_state) {
   $file->status = FILE_STATUS_PERMANENT;
   // Save file status.
   file_save($file);
-  $base_path = variable_get('file_public_path', conf_path() . '/files');
+  $base_path = '/'.variable_get('file_public_path', conf_path() . '/files');
   $new_image_path = $base_path.'/'.$file->filename;
   $page_path = array_pop(explode('/', $_GET['q']));
   $page_path = customheaderimage_dashtoslash($page_path);

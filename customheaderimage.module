@@ -118,7 +118,7 @@ function customheaderimage_menu() {
       //File already has rule
       ////.page-node-1 #header\{ background-image: url\('([a-z/_0-9.]+)
       $string = preg_match(
-                  "|$class #header \{ background-image: url\('([a-z/_0-9.]+)|"
+                  "|$class #header \{ background-image: url\('([a-zA-Z/_0-9.]+)|"
                   , $file, $matches);
       $image_path = $matches[1];
       return $image_path;
@@ -129,6 +129,8 @@ function customheaderimage_menu() {
     $file = file_get_contents($file_path);
     $new_rule =  $class . " #header { background-image: url('$new_image'); }";
     $old_rule =  $class . " #header { background-image: url('$old_image'); }";
+    dpm('New rule: '.$new_rule);
+    dpm('Old rule: '.$old_rule);
     $file = str_replace($old_rule, $new_rule, $file);
     if(file_put_contents($file_path, $file)) {
       drupal_set_message('updated css');
