@@ -1,6 +1,4 @@
 <?php
-// $Id$
-
 /**
  * @file
  * Configuration for Custom Header Image Module
@@ -60,6 +58,7 @@ function customheaderimage_create_form_array($paths, $views) {
   }
   return $titles;
 }
+
 /**
  * Returns HTML of table to display paths and titles on config page
  * @param  [array] $paths [assoc array of title=>path]
@@ -202,7 +201,7 @@ function customheaderimage_title_from_view_name($name) {
 }
 
  /****************************************************************************
- * Image editing form functions below
+ * Image form functions below
  ****************************************************************************
  *
  * Displays Image Upload form on edit page
@@ -260,6 +259,11 @@ function customheaderimage_edit_image_form($form, &$form_submit) {
 
   return $form;
 }
+
+/**
+ * Validates the image form to make sure it's a proper file and then prepares
+ * it for storage in sublmie
+ */
 function customheaderimage_edit_image_form_validate($form, &$form_state) {
   $file = file_save_upload('file', array(
     'file_validate_is_image' => array(), // Validates file is really an image.
@@ -281,6 +285,10 @@ function customheaderimage_edit_image_form_validate($form, &$form_state) {
   }
 }
 
+/**
+ * Stores the image in the filesystem and calls on the add_rule function to
+ * add the rule to the css or update it.
+ */
 function customheaderimage_edit_image_form_submit($form, &$form_state) {
   $file = $form_state['storage']['file'];
   // We are done with the file, remove it from storage.
@@ -336,6 +344,13 @@ function customheaderimage_edit_image_form_submit($form, &$form_state) {
       }
     }
   }
+
+  /**
+   * Returns the class that will be used in creating or searching the css
+   * file rules.
+   * @param  [string] $page_path [path to page we are checking ex: node/1]
+   * @return [string]            [ex: .page-node-1]
+   */
   function customheaderimage_get_class($page_path) {
     if ($page_path != 'global') {
       if (stristr($page_path, 'node')) {
@@ -354,6 +369,13 @@ function customheaderimage_edit_image_form_submit($form, &$form_state) {
     }
       return $class;
   }
+
+  /**
+   * Checks to see if a specific class exists in the css file. This tells us
+   * if a rule exists or not
+   * @param  [string] $class [CSS class to search for]
+   * @return [boolean]        [True if we find it, False if not]
+   */
   function customheaderimage_class_exists($class) {
     $file_text = file_get_contents(CSS_PATH);
     if (stristr($file_text, $class)) {
@@ -361,6 +383,7 @@ function customheaderimage_edit_image_form_submit($form, &$form_state) {
     }
     return FALSE;
   }
+
   /**
    * Checks if rule already exists by checking if the class already
    * exists in the CSS file
@@ -392,6 +415,12 @@ function customheaderimage_edit_image_form_submit($form, &$form_state) {
     return FALSE;
   }
 
+  /**
+   * Removes the rule for the page path that you pass it in the css file.
+   * This is called when someone clicks a delete link
+   * @param  [string] $page_path [ex: node/1]
+   * @return [boolean]            [True if removed, False for error]
+   */
   function customheaderimage_remove_rule($page_path) {
     $class = customheaderimage_get_class($page_path);
 
@@ -407,6 +436,14 @@ function customheaderimage_edit_image_form_submit($form, &$form_state) {
     }
     return FALSE;
   }
+
+  /**
+   * Gets the image name from within the css file for a specified class.
+   * This is used to display and link to the images that are currently
+   * set up.
+   * @param  [string] $page_path [ex: node/1]
+   * @return [string]            [header.jpg]
+   */
   function customheaderimage_image_name($page_path) {
     $class = customheaderimage_get_class($page_path);
     $image_path = customheaderimage_check_rule($class);
