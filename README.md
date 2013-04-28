@@ -1,1 +1,1 @@
-Module Development for Poetic Systmes. Work in Progress
+Module Development for Poetic Systems. Work in Progress

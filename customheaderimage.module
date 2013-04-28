@@ -4,10 +4,12 @@
 * Implements hook_init().
 */
 function customheaderimage_init() {
-	drupal_add_css(drupal_get_path('module', 'customheaderimage') .
-    	'/css/customheaderimage_style.css', array('group' => CSS_DEFAULT, 'every_page' => TRUE));
+  $css_path = drupal_get_path('module', 'customheaderimage') .'/css/customheaderimage_style.css';
+	drupal_add_css($css_path, array('group' => CSS_DEFAULT, 'every_page' => TRUE));
   //Below is for testing purposes
-  customheaderimage_add_rule('node/1', '/sites/default/files/bookpurchase_1.jpg');
+  //customheaderimage_add_rule('node/2', '/sites/default/files/bookpurchase_1.jpg');
+
+  customheaderimage_update_image('.page-node-1', $css_path, '/sites/default/files/bookpurchase_1.jpg', '/images.jpg');
 }
 
 /**
@@ -90,8 +92,8 @@ function customheaderimage_menu() {
     }
     else {
       //rule already exists
-      //update path
-      dpm($image_path);
+      //update path here
+
     }
   }
   /**
@@ -106,14 +108,25 @@ function customheaderimage_menu() {
       //File already has rule
       ////.page-node-1 #header\{ background-image: url\('([a-z/_0-9.]+)
       $string = preg_match(
-                  "|$class #header\{ background-image: url\('([a-z/_0-9.]+)|"
+                  "|$class #header \{ background-image: url\('([a-z/_0-9.]+)|"
                   , $file, $matches);
       $image_path = $matches[1];
       return $image_path;
     }
     return FALSE;
   }
-
+  function customheaderimage_update_image($class, $file_path, $new_image, $old_image) {
+    $file = file_get_contents($file_path);
+    $new_rule =  $class . " #header { background-image: url('$new_image'); }";
+    $old_rule =  $class . " #header { background-image: url('$old_image'); }";
+    $file = str_replace($old_rule, $new_rule, $file);
+    dpm($file);
+    if(file_put_contents($file_path, $file)) {
+      drupal_set_message('updated css');
+      return TRUE;
+    }
+    return FALSE;
+  }
 //Function here termorarily because it is in the admin inc and we are using
 //it for checking the css
   function customheaderimage_get_nid_from_path($string) {
