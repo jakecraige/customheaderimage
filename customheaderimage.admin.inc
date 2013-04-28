@@ -180,7 +180,7 @@ function customheaderimage_title_from_view_name($name) {
 }
 
  /****************************************************************************
- * Image editing functions below
+ * Image editing form functions below
  ****************************************************************************
  *
  * Displays Image Upload form on edit page
@@ -249,3 +249,86 @@ function customheaderimage_edit_image_form_submit($form, &$form_state) {
   drupal_set_message(t('The form has been submitted and the image has been saved, filename: @filename.'
                         , array('@filename' => $file->filename)));
 }
+
+/********************************************************************
+ CSS Processing functions below
+ ********************************************************************
+ * This function will be called on the image upload form submit
+ * It will add the rule to the css when its not there or update
+ * when it's different
+ * @param  [string] $page_path [path to page we are checking]
+ * @param  [string] $image     [path to image uploaded]
+ * @return [boolean]            [True if added. False for error]
+ */
+  function customheaderimage_add_rule($page_path, $image) {
+    $path = drupal_get_path('module', 'customheaderimage').'/css/customheaderimage_style.css';
+    if(stristr($page_path, 'node')) {
+      //Set up page css styles ex: page-node-2
+      $nid = customheaderimage_get_nid_from_path($page_path);
+      $class = "\n.page-node-$nid";
+    }
+    else {
+      //Set up view css styles ex: page-path-to-view
+      $page_path = str_replace('/', '-', $page_path);
+      $class = "\n.page-$page_path";
+    }
+    $style = " #header { background-image: url('$image'); }";
+
+    $css_class_exists = customheaderimage_class_exists($class, $path);
+
+    if(!$css_class_exists) {
+      //No image path means that the css rule does not exist yet
+      if(file_put_contents($path, $class.$style, FILE_APPEND)) {
+        drupal_set_message('Added CSS Style');
+      }
+      else {
+        drupal_set_message('Error adding CSS style', 'error');
+      }
+    }
+    else { //Rule already exists, Should we update?
+      $image_path = customheaderimage_check_rule($class, $path);
+      if($image_path != $image) {
+        //No the same img path so Update path
+        customheaderimage_update_image($class, $path, $image, $image_path);
+      }
+    }
+  }
+  function customheaderimage_class_exists($class, $file_path) {
+    $file = file_get_contents($file_path);
+    if(stristr($file, $class)) {
+      return TRUE;
+    }
+    return FALSE;
+  }
+  /**
+   * Checks if rule already exists by checking if the class already
+   * exists in the CSS file
+   * @param  [string] $class [class to check]
+   * @return [string]        [img path]
+   */
+  function customheaderimage_check_rule($class, $file_path) {
+    $file = file_get_contents($file_path);
+    if(stristr($file, $class)) {
+      //File already has rule
+      ////.page-node-1 #header\{ background-image: url\('([a-z/_0-9.]+)
+      $string = preg_match(
+                  "|$class #header \{ background-image: url\('([a-zA-Z/_0-9.]+)|"
+                  , $file, $matches);
+      $image_path = $matches[1];
+      return $image_path;
+    }
+    return FALSE;
+  }
+  function customheaderimage_update_image($class, $file_path, $new_image, $old_image) {
+    $file = file_get_contents($file_path);
+    $new_rule =  $class . " #header { background-image: url('$new_image'); }";
+    $old_rule =  $class . " #header { background-image: url('$old_image'); }";
+    dpm('New rule: '.$new_rule);
+    dpm('Old rule: '.$old_rule);
+    $file = str_replace($old_rule, $new_rule, $file);
+    if(file_put_contents($file_path, $file)) {
+      drupal_set_message('updated css');
+      return TRUE;
+    }
+    return FALSE;
+  }
