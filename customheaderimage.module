@@ -1,15 +1,19 @@
 <?php
 
 /**
+ * @file
+ * Custom Header Image .module file
+ *
+ * This is a small condensed .module file to increase performance. Heavy
+ * Processing is done in the customheaderimage.admin.inc file
+ */
+
+/**
 * Implements hook_init().
 */
 function customheaderimage_init() {
-  $css_path = drupal_get_path('module', 'customheaderimage') .'/css/customheaderimage_style.css';
-	drupal_add_css($css_path, array('group' => CSS_DEFAULT, 'every_page' => TRUE));
-  //Below is for testing purposes
-  //customheaderimage_add_rule('node/2', '/sites/default/files/bookpurchase_1.jpg');
-
-  //customheaderimage_update_image('.page-node-1', $css_path, '/sites/default/files/bookpurchase_1.jpg', '/images.jpg');
+  $css_path = drupal_get_path('module', 'customheaderimage') . '/css/customheaderimage_style.css';
+  drupal_add_css($css_path, array('group' => CSS_DEFAULT, 'every_page' => TRUE));
 }
 
 /**
@@ -60,16 +64,6 @@ function customheaderimage_menu() {
   );
   return $items;
 }
-/*$items['admin/config/customheaderimage/global'] = array(
-    'title' => 'Global',
-    'description' => 'Configuration for global default headers',
-    'type' => MENU_LOCAL_TASK,
-    'page callback' => 'customheaderimage_display_global',
-    'access arguments' => array('administer customheaderimage'),
-    'file' => 'customheaderimage.admin.inc',
-    'file path' => drupal_get_path('module', 'customheaderimage'),
-  );*/
-
 
 /**
  * Implements hook_permission().
