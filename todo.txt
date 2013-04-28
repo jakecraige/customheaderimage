@@ -1,2 +1,1 @@
--Add delete functions to remove specific paths
 -show which image is being used currently

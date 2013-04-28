@@ -1,6 +1,7 @@
 .page-node-3 #header { background-image: url('/sites/default/files/IMAG0331.jpg'); }
-.page-a-new-view #header { background-image: url('/sites/default/files/IMAG0340.jpg'); }
+.page-a-new-view #header { background-image: url('/sites/default/files/grass.jpg'); }
 .page-nested-this-is-a-nested-view #header { background-image: url('/sites/default/files/IMAG0328.jpg'); }
 
-body #header { background-image: url('/sites/default/files/sunny.jpg'); }
 .page-node-6 #header { background-image: url('/sites/default/files/IMAG0347.jpg'); }
+
+body #header { background-image: url('/sites/default/files/sunny.jpg'); }

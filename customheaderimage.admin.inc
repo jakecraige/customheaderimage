@@ -198,8 +198,14 @@ function customheaderimage_edit_image_form($form, &$form_submit) {
   if($global) {
     $html .= '<p>'.
               t('Upload the image you want to be displayed as the header image
-              globally excluding ones you set explicitly using this form.')
-          .'</p>';
+              globally excluding ones you set explicitly using this form. If
+              you want to remove this default and use your normal css
+              stylesheets click the link below')
+          .'.</p>
+            <p>'
+            .l('Click here to delete global default',
+                'admin/config/customheaderimage/delete/global')
+            .'</p>';
   }
   else {
     $html .= '<p>'.
@@ -279,12 +285,8 @@ function customheaderimage_edit_image_form_submit($form, &$form_state) {
   function customheaderimage_add_rule($page_path, $image) {
     // path to CSS
     $path = drupal_get_path('module', 'customheaderimage') .'/css/customheaderimage_style.css';
-    if($page_path != 'global') {
-      $class = customheaderimage_get_class($page_path);
-    }
-    else { //Using Global Form
-      $class = "\nbody";
-    }
+    $class = customheaderimage_get_class($page_path);
+
     $style = " #header { background-image: url('$image'); }";
 
     $css_class_exists = customheaderimage_class_exists($class, $path);
@@ -307,16 +309,21 @@ function customheaderimage_edit_image_form_submit($form, &$form_state) {
     }
   }
   function customheaderimage_get_class($page_path) {
-    if(stristr($page_path, 'node')) {
-        //Set up page css styles ex: page-node-2
-        $nid = customheaderimage_get_nid_from_path($page_path);
-        $class = "\n.page-node-$nid";
+    if($page_path != 'global') {
+      if(stristr($page_path, 'node')) {
+          //Set up page css styles ex: page-node-2
+          $nid = customheaderimage_get_nid_from_path($page_path);
+          $class = "\n.page-node-$nid";
+        }
+        else {
+          //Set up view css styles ex: page-path-to-view
+          $page_path = str_replace('/', '-', $page_path);
+          $class = "\n.page-$page_path";
       }
-      else {
-        //Set up view css styles ex: page-path-to-view
-        $page_path = str_replace('/', '-', $page_path);
-        $class = "\n.page-$page_path";
-      }
+    }
+    else {
+      $class = "\nbody";
+    }
       return $class;
   }
   function customheaderimage_class_exists($class, $file_path) {
@@ -349,11 +356,10 @@ function customheaderimage_edit_image_form_submit($form, &$form_state) {
     $file = file_get_contents($file_path);
     $new_rule =  $class . " #header { background-image: url('$new_image'); }";
     $old_rule =  $class . " #header { background-image: url('$old_image'); }";
-    dpm('New rule: '.$new_rule);
-    dpm('Old rule: '.$old_rule);
+
     $file = str_replace($old_rule, $new_rule, $file);
     if(file_put_contents($file_path, $file)) {
-      drupal_set_message('updated css');
+      drupal_set_message('Updated header image.');
       return TRUE;
     }
     return FALSE;
@@ -372,7 +378,6 @@ function customheaderimage_edit_image_form_submit($form, &$form_state) {
       if(file_put_contents($path, $file)) {
         return TRUE;
       }
-      return FALSE;
     }
     return FALSE;
   }
@@ -380,8 +385,7 @@ function customheaderimage_edit_image_form_submit($form, &$form_state) {
 /********************************************************************
 Delete rule functinos below
  ********************************************************************
- */
-/**
+ *
  * Menu callback; get confirm form for deleting search history.
  */
 function customheaderimage_delete() {
@@ -421,6 +425,5 @@ function customheaderimage_dashtoslash($string) {
   return str_replace('--', '/', $string);
 }
 function customheaderimage_get_last_argument() {
-  $q = $_GET['q'];
-  return customheaderimage_dashtoslash(array_pop(explode('/', $q)));
+  return customheaderimage_dashtoslash(array_pop(explode('/', $_GET['q'])));
 }
