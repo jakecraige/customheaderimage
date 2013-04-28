@@ -86,8 +86,8 @@ function customheaderimage_create_table($paths) {
     );
     if ($image) {
       $rows[$count]['operations'] .= '<span class="customheaderimage_delete"> | ' . l(t('Delete'), 'admin/config/customheaderimage/delete/'
-                             . customheaderimage_slashtodash($path)
-                              .'</span>');
+                             . customheaderimage_slashtodash($path))
+                              .'</span>';
     }
     $count++;
   }
@@ -423,14 +423,15 @@ function customheaderimage_edit_image_form_submit($form, &$form_state) {
    */
   function customheaderimage_remove_rule($page_path) {
     $class = customheaderimage_get_class($page_path);
-
+    dpm('class:'.$class);
     if (customheaderimage_class_exists($class)) {
       $image_path = customheaderimage_check_rule($class);
-      $file = file_get_contents($path);
+
+      $file_text = file_get_contents(CSS_PATH);
       $rule =  $class . " #header { background-image: url('$image_path'); }";
 
-      $file = str_replace($rule, '', $file);
-      if (file_put_contents($path, $file)) {
+      $file_text = str_replace($rule, '', $file_text);
+      if (file_put_contents(CSS_PATH, $file_text)) {
         return TRUE;
       }
     }
@@ -479,8 +480,12 @@ function customheaderimage_delete_confirm($form, &$form_state) {
  * Submit function for the confirm deletion form.
  */
 function customheaderimage_delete_confirm_submit($form, &$form_state) {
-  customheaderimage_remove_rule(customheaderimage_get_last_argument());
-  drupal_set_message(t('This path specific header image has been cleared.'));
+  if(customheaderimage_remove_rule(customheaderimage_get_last_argument())) {
+    drupal_set_message(t('This path specific header image has been cleared.'));
+  }
+  else {
+    drupal_set_message(t('Error deleting this header image rule.', 'error'));
+  }
 }
 
 
