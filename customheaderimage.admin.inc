@@ -197,7 +197,7 @@ function customheaderimage_title_from_view_name($name) {
  */
 function customheaderimage_edit_image_form($form, &$form_submit) {
   $html = '<h2>'.t('Upload Image').'</h2>';
-
+  $base_path = variable_get('file_public_path', conf_path() . '/files');
   //Checking if we are on global page
   $global = preg_match('|/global$|', $_GET['q']);
   if($global) {
@@ -213,7 +213,6 @@ function customheaderimage_edit_image_form($form, &$form_submit) {
             .'</p>';
      // $image = customheaderimage_image_name('global');
       if($image = customheaderimage_image_name('global')) {
-        $base_path = variable_get('file_public_path', conf_path() . '/files');
         $html .= '<p>'.t('Your current image is: ')
                     .l($image, $base_path.'/'.$image)
                   .'</p>';
@@ -224,6 +223,12 @@ function customheaderimage_edit_image_form($form, &$form_submit) {
               t('Upload the image you want to be displayed as the header image
               for this specific page using this form.')
           .'</p>';
+    $page_path = customheaderimage_get_last_argument();
+    if($image = customheaderimage_image_name($page_path)) {
+      $html .= '<p>Your current image is: '
+                  .l($image, $base_path.'/'.$image)
+                .'</p>';
+    }
   }
 
   $form['info'] = array(
