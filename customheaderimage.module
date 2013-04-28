@@ -6,6 +6,7 @@
 function customheaderimage_init() {
 	drupal_add_css(drupal_get_path('module', 'customheaderimage') .
     	'/css/customheaderimage_style.css', array('group' => CSS_DEFAULT, 'every_page' => TRUE));
+  //Below is for testing purposes
   customheaderimage_add_rule('node/1', '/sites/default/files/bookpurchase_1.jpg');
 }
 
@@ -50,30 +51,36 @@ function customheaderimage_menu() {
 
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
+//Functions in this block for testing and will be moved later
+//to css processing file
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
+/**
+ * This function will be called on the image upload form submit
+ * It will add the rule to the css when its not there or update
+ * when it's different
+ * @param  [string] $page_path [path to page we are checking]
+ * @param  [string] $image     [path to image uploaded]
+ * @return [boolean]            [True if added. False for error]
+ */
   function customheaderimage_add_rule($page_path, $image) {
     $path = drupal_get_path('module', 'customheaderimage').'/css/customheaderimage_style.css';
-    //$file = fopen($path, 'c');
-    //$size = filesize($path);
 
-    // if(fwrite($file, 'cats')) {
-    //     drupal_set_message('Added CSS Style');
-    //   }
     if(stristr($page_path, 'node')) {
-      //Set up page css styles
-      //page-node-2
+      //Set up page css styles ex: page-node-2
       $nid = customheaderimage_get_nid_from_path($page_path);
-      $class = "\n.page-node-".$nid;
-      $style = " #header { background-image: url('$image'); }";
+      $class = "\n.page-node-$nid";
     }
     else {
-      //Set up view css styles
-      //page-path-to-view
+      //Set up view css styles ex: page-path-to-view
+      $page_path = str_replace('/', '-', $page_path);
+      $class = "\n.page-$page_path";
     }
+    $style = " #header { background-image: url('$image'); }";
     $image_path = customheaderimage_check_rule($class, $path);
     if($image_path === FALSE) {
+      //No image path means that the css rule does not exist yet
       if(file_put_contents($path, $class.$style, FILE_APPEND)) {
         drupal_set_message('Added CSS Style');
       }
@@ -89,7 +96,7 @@ function customheaderimage_menu() {
   }
   /**
    * Checks if rule already exists by checking if the class already
-   * exists in the file
+   * exists in the CSS file
    * @param  [string] $class [class to check]
    * @return [string]        [img path]
    */
@@ -107,6 +114,8 @@ function customheaderimage_menu() {
     return FALSE;
   }
 
+//Function here termorarily because it is in the admin inc and we are using
+//it for checking the css
   function customheaderimage_get_nid_from_path($string) {
     $string = explode('/', $string);
     $string = array_reverse($string);
