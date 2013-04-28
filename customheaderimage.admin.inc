@@ -69,6 +69,7 @@ function customheaderimage_create_table($paths) {
     'operations'    => t('Operations'),
   );
   $rows = array();
+  $count = 0;
   foreach ($paths as $title=>$path) {
     $base_path = variable_get('file_public_path', conf_path() . '/files');
     $image = customheaderimage_image_name($path);
@@ -78,12 +79,15 @@ function customheaderimage_create_table($paths) {
                 'image' => l($image, $base_path.'/'.$image),
                 'operations'
                     => l('Edit', 'admin/config/customheaderimage/edit/'
-                                  .customheaderimage_slashtodash($path))
-                       .' | '
-                       .l('Delete', 'admin/config/customheaderimage/delete/'
                                   .customheaderimage_slashtodash($path)),
     );
+    if($image) {
+      $rows[$count]['operations'] .= ' | ' . l('Delete', 'admin/config/customheaderimage/delete/'
+                             .customheaderimage_slashtodash($path));
+    }
+    $count++;
   }
+
   return theme('table', array('header' => $header,'rows' => $rows));
 }
 
@@ -206,14 +210,14 @@ function customheaderimage_edit_image_form($form, &$form_submit) {
               globally excluding ones you set explicitly using this form. If
               you want to remove this default and use your normal css
               stylesheets click the link below')
-          .'.</p>
-            <p>'
-            .l('Click here to delete global default',
-                'admin/config/customheaderimage/delete/global')
-            .'</p>';
+          .'.</p>';
      // $image = customheaderimage_image_name('global');
       if($image = customheaderimage_image_name('global')) {
-        $html .= '<p>'.t('Your current image is: ')
+        $html .= '<p>'
+                  .l('Click here to delete global default',
+                      'admin/config/customheaderimage/delete/global')
+                  .'</p>'.
+                  '<p>'.t('Your current image is: ')
                     .l($image, $base_path.'/'.$image)
                   .'</p>';
       }
