@@ -86,8 +86,9 @@ function customheaderimage_create_table($paths) {
                                   . customheaderimage_slashtodash($path)),
     );
     if ($image) {
-      $rows[$count]['operations'] .= ' | ' . l(t('Delete'), 'admin/config/customheaderimage/delete/'
-                             . customheaderimage_slashtodash($path));
+      $rows[$count]['operations'] .= '<span class="customheaderimage_delete"> | ' . l(t('Delete'), 'admin/config/customheaderimage/delete/'
+                             . customheaderimage_slashtodash($path)
+                              .'</span>');
     }
     $count++;
   }
