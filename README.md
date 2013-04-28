@@ -7,4 +7,4 @@ Module Development for Poetic Systems. Work in Progress
 Bugs
 -Name of views doesn't update.
 -uploading file with same name causes issues if it was deleted form direcctory?
--Menu items showing delete and edit which don't work
+-Config page showing edit and delete, we only want configure

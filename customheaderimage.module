@@ -55,6 +55,7 @@ function customheaderimage_menu() {
     'file path' => drupal_get_path('module', 'customheaderimage'),
   );
   $items['admin/config/customheaderimage/delete'] = array(
+    'type' => MENU_CALLBACK,
     'title' => 'Delete Header Image',
     'description' => 'Delete specific path image',
     'page callback' => 'customheaderimage_delete',
