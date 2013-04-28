@@ -1,3 +1,6 @@
 
-.page-node-1 #header { background-image: url('/sites/default/files/bookpurchase_1.jpg'); }
-.page-node-2 #header { background-image: url('/cats.jpg'); }
+.page-node-1 #header { background-image: url('sites/default/files/IMAG0266.jpg'); }
+.page-node-2 #header { background-image: url('cats'); }
+
+
+.page-node-3 #header { background-image: url('cats'); }

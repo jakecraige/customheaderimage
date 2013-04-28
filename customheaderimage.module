@@ -9,7 +9,7 @@ function customheaderimage_init() {
   //Below is for testing purposes
   //customheaderimage_add_rule('node/2', '/sites/default/files/bookpurchase_1.jpg');
 
-  customheaderimage_update_image('.page-node-1', $css_path, '/sites/default/files/bookpurchase_1.jpg', '/images.jpg');
+  //customheaderimage_update_image('.page-node-1', $css_path, '/sites/default/files/bookpurchase_1.jpg', '/images.jpg');
 }
 
 /**
@@ -68,10 +68,9 @@ function customheaderimage_menu() {
  */
   function customheaderimage_add_rule($page_path, $image) {
     $path = drupal_get_path('module', 'customheaderimage').'/css/customheaderimage_style.css';
-
     if(stristr($page_path, 'node')) {
       //Set up page css styles ex: page-node-2
-      $nid = customheaderimage_get_nid_from_path($page_path);
+      $nid = customheaderimage_get_nid_from_path_2($page_path);
       $class = "\n.page-node-$nid";
     }
     else {
@@ -80,8 +79,10 @@ function customheaderimage_menu() {
       $class = "\n.page-$page_path";
     }
     $style = " #header { background-image: url('$image'); }";
-    $image_path = customheaderimage_check_rule($class, $path);
-    if($image_path === FALSE) {
+
+    $css_class_exists = customheaderimage_class_exists($class, $path);
+
+    if(!$css_class_exists) {
       //No image path means that the css rule does not exist yet
       if(file_put_contents($path, $class.$style, FILE_APPEND)) {
         drupal_set_message('Added CSS Style');
@@ -90,11 +91,20 @@ function customheaderimage_menu() {
         drupal_set_message('Error adding CSS style', 'error');
       }
     }
-    else {
-      //rule already exists
-      //update path here
-
+    else { //Rule already exists, Should we update?
+      $image_path = customheaderimage_check_rule($class, $path);
+      if($image_path != $image) {
+        //No the same img path so Update path
+        customheaderimage_update_image($class, $path, $image, $image_path);
+      }
     }
+  }
+  function customheaderimage_class_exists($class, $file_path) {
+    $file = file_get_contents($file_path);
+    if(stristr($file, $class)) {
+      return TRUE;
+    }
+    return FALSE;
   }
   /**
    * Checks if rule already exists by checking if the class already
@@ -120,7 +130,6 @@ function customheaderimage_menu() {
     $new_rule =  $class . " #header { background-image: url('$new_image'); }";
     $old_rule =  $class . " #header { background-image: url('$old_image'); }";
     $file = str_replace($old_rule, $new_rule, $file);
-    dpm($file);
     if(file_put_contents($file_path, $file)) {
       drupal_set_message('updated css');
       return TRUE;
@@ -129,7 +138,7 @@ function customheaderimage_menu() {
   }
 //Function here termorarily because it is in the admin inc and we are using
 //it for checking the css
-  function customheaderimage_get_nid_from_path($string) {
+  function customheaderimage_get_nid_from_path_2($string) {
     $string = explode('/', $string);
     $string = array_reverse($string);
     return $string['0'];
@@ -149,4 +158,11 @@ function customheaderimage_permission() {
       'description' => t('Perform administration tasks for Custom Header Image module.'),
     ),
   );
+}
+
+function customheaderimage_slashtodash($string) {
+  return str_replace('/', '--', $string);
+}
+function customheaderimage_dashtoslash($string) {
+  return str_replace('--', '/', $string);
 }

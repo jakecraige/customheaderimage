@@ -72,7 +72,9 @@ function customheaderimage_create_table($paths) {
     $rows[] = array(
                 'title' => l($title, $path),
                 'path' => $path,
-                'operations' => l('edit', 'admin/config/customheaderimage/edit/'.$title),
+                'operations'
+                    => l('edit', 'admin/config/customheaderimage/edit/'
+                                  .customheaderimage_slashtodash($path)),
     );
   }
   return theme('table', array('header' => $header,'rows' => $rows));
@@ -236,7 +238,14 @@ function customheaderimage_edit_image_form_submit($form, &$form_state) {
   $file->status = FILE_STATUS_PERMANENT;
   // Save file status.
   file_save($file);
+  $base_path = variable_get('file_public_path', conf_path() . '/files');
+  $new_image_path = $base_path.'/'.$file->filename;
+  $page_path = array_pop(explode('/', $_GET['q']));
+  $page_path = customheaderimage_dashtoslash($page_path);
+
+  customheaderimage_add_rule($page_path, $new_image_path);
 
   // Set a response to the user.
-  drupal_set_message(t('The form has been submitted and the image has been saved, filename: @filename.', array('@filename' => $file->filename)));
+  drupal_set_message(t('The form has been submitted and the image has been saved, filename: @filename.'
+                        , array('@filename' => $file->filename)));
 }
