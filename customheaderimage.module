@@ -34,8 +34,9 @@ function customheaderimage_menu() {
     'title' => 'Global',
     'description' => 'Configuration for global default headers',
     'type' => MENU_LOCAL_TASK,
-    'page callback' => 'customheaderimage_display_global',
-    'access arguments' => array('administer customheaderimage'),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('customheaderimage_edit_image_form'),
+    'access callback' => TRUE,
     'file' => 'customheaderimage.admin.inc',
     'file path' => drupal_get_path('module', 'customheaderimage'),
   );
@@ -51,6 +52,16 @@ function customheaderimage_menu() {
   );
   return $items;
 }
+/*$items['admin/config/customheaderimage/global'] = array(
+    'title' => 'Global',
+    'description' => 'Configuration for global default headers',
+    'type' => MENU_LOCAL_TASK,
+    'page callback' => 'customheaderimage_display_global',
+    'access arguments' => array('administer customheaderimage'),
+    'file' => 'customheaderimage.admin.inc',
+    'file path' => drupal_get_path('module', 'customheaderimage'),
+  );*/
+
 
 /**
  * Implements hook_permission().
@@ -62,11 +73,4 @@ function customheaderimage_permission() {
       'description' => t('Perform administration tasks for Custom Header Image module.'),
     ),
   );
-}
-
-function customheaderimage_slashtodash($string) {
-  return str_replace('/', '--', $string);
-}
-function customheaderimage_dashtoslash($string) {
-  return str_replace('--', '/', $string);
 }

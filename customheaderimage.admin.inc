@@ -188,11 +188,23 @@ function customheaderimage_title_from_view_name($name) {
  * @return [array]       [form structure]
  */
 function customheaderimage_edit_image_form($form, &$form_submit) {
-  $html = '<h2>'.t('Upload Image for @arg1', array( '@arg1' => 'test')).'</h2>';
-  $html .= '<p>'.
+  $html = '<h2>'.t('Upload Image').'</h2>';
+
+  //Checking if we are on global page
+  $global = preg_match('|/global$|', $_GET['q']);
+  if($global) {
+    $html .= '<p>'.
               t('Upload the image you want to be displayed as the header image
-              using this form.')
+              globally excluding ones you set explicitly using this form.')
           .'</p>';
+  }
+  else {
+    $html .= '<p>'.
+              t('Upload the image you want to be displayed as the header image
+              for this specific page using this form.')
+          .'</p>';
+  }
+
   $form['info'] = array(
     '#type' => 'markup',
     '#markup' => $html,
@@ -243,6 +255,7 @@ function customheaderimage_edit_image_form_submit($form, &$form_state) {
   $page_path = array_pop(explode('/', $_GET['q']));
   $page_path = customheaderimage_dashtoslash($page_path);
 
+  $global = preg_match('|/global$|', $_GET['q']);
   customheaderimage_add_rule($page_path, $new_image_path);
 
   // Set a response to the user.
@@ -261,16 +274,22 @@ function customheaderimage_edit_image_form_submit($form, &$form_state) {
  * @return [boolean]            [True if added. False for error]
  */
   function customheaderimage_add_rule($page_path, $image) {
-    $path = drupal_get_path('module', 'customheaderimage').'/css/customheaderimage_style.css';
-    if(stristr($page_path, 'node')) {
-      //Set up page css styles ex: page-node-2
-      $nid = customheaderimage_get_nid_from_path($page_path);
-      $class = "\n.page-node-$nid";
+    // path to CSS
+    $path = drupal_get_path('module', 'customheaderimage') .'/css/customheaderimage_style.css';
+    if($page_path != 'global') {
+      if(stristr($page_path, 'node')) {
+        //Set up page css styles ex: page-node-2
+        $nid = customheaderimage_get_nid_from_path($page_path);
+        $class = "\n.page-node-$nid";
+      }
+      else {
+        //Set up view css styles ex: page-path-to-view
+        $page_path = str_replace('/', '-', $page_path);
+        $class = "\n.page-$page_path";
+      }
     }
-    else {
-      //Set up view css styles ex: page-path-to-view
-      $page_path = str_replace('/', '-', $page_path);
-      $class = "\n.page-$page_path";
+    else { //Using Global Form
+      $class = "\nbody";
     }
     $style = " #header { background-image: url('$image'); }";
 
@@ -332,3 +351,25 @@ function customheaderimage_edit_image_form_submit($form, &$form_state) {
     }
     return FALSE;
   }
+
+/********************************************************************
+ Global Header functions below
+ ********************************************************************
+ * This function will be called on the image upload form submit
+ * It will add the rule to the css when its not there or update
+ * when it's different
+ * @param  [string] $page_path [path to page we are checking]
+ * @param  [string] $image     [path to image uploaded]
+ * @return [boolean]            [True if added. False for error]
+ */
+
+
+/********************************************************************
+ Helper functions below
+ ********************************************************************/
+function customheaderimage_slashtodash($string) {
+  return str_replace('/', '--', $string);
+}
+function customheaderimage_dashtoslash($string) {
+  return str_replace('--', '/', $string);
+}
