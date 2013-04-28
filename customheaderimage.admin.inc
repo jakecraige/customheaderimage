@@ -73,7 +73,10 @@ function customheaderimage_create_table($paths) {
                 'title' => l($title, $path),
                 'path' => $path,
                 'operations'
-                    => l('edit', 'admin/config/customheaderimage/edit/'
+                    => l('Edit', 'admin/config/customheaderimage/edit/'
+                                  .customheaderimage_slashtodash($path))
+                       .' | '
+                       .l('Delete', 'admin/config/customheaderimage/delete/'
                                   .customheaderimage_slashtodash($path)),
     );
   }
@@ -277,16 +280,7 @@ function customheaderimage_edit_image_form_submit($form, &$form_state) {
     // path to CSS
     $path = drupal_get_path('module', 'customheaderimage') .'/css/customheaderimage_style.css';
     if($page_path != 'global') {
-      if(stristr($page_path, 'node')) {
-        //Set up page css styles ex: page-node-2
-        $nid = customheaderimage_get_nid_from_path($page_path);
-        $class = "\n.page-node-$nid";
-      }
-      else {
-        //Set up view css styles ex: page-path-to-view
-        $page_path = str_replace('/', '-', $page_path);
-        $class = "\n.page-$page_path";
-      }
+      $class = customheaderimage_get_class($page_path);
     }
     else { //Using Global Form
       $class = "\nbody";
@@ -311,6 +305,19 @@ function customheaderimage_edit_image_form_submit($form, &$form_state) {
         customheaderimage_update_image($class, $path, $image, $image_path);
       }
     }
+  }
+  function customheaderimage_get_class($page_path) {
+    if(stristr($page_path, 'node')) {
+        //Set up page css styles ex: page-node-2
+        $nid = customheaderimage_get_nid_from_path($page_path);
+        $class = "\n.page-node-$nid";
+      }
+      else {
+        //Set up view css styles ex: page-path-to-view
+        $page_path = str_replace('/', '-', $page_path);
+        $class = "\n.page-$page_path";
+      }
+      return $class;
   }
   function customheaderimage_class_exists($class, $file_path) {
     $file = file_get_contents($file_path);
@@ -352,16 +359,56 @@ function customheaderimage_edit_image_form_submit($form, &$form_state) {
     return FALSE;
   }
 
+  function customheaderimage_remove_rule($page_path) {
+    $path = drupal_get_path('module', 'customheaderimage') .'/css/customheaderimage_style.css';
+    $class = customheaderimage_get_class($page_path);
+
+    if(customheaderimage_class_exists($class, $path)) {
+      $image_path = customheaderimage_check_rule($class, $path);
+      $file = file_get_contents($path);
+      $rule =  $class . " #header { background-image: url('$image_path'); }";
+
+      $file = str_replace($rule, '', $file);
+      if(file_put_contents($path, $file)) {
+        return TRUE;
+      }
+      return FALSE;
+    }
+    return FALSE;
+  }
+
 /********************************************************************
- Global Header functions below
+Delete rule functinos below
  ********************************************************************
- * This function will be called on the image upload form submit
- * It will add the rule to the css when its not there or update
- * when it's different
- * @param  [string] $page_path [path to page we are checking]
- * @param  [string] $image     [path to image uploaded]
- * @return [boolean]            [True if added. False for error]
  */
+/**
+ * Menu callback; get confirm form for deleting search history.
+ */
+function customheaderimage_delete() {
+  return drupal_get_form('customheaderimage_delete_confirm');
+}
+
+
+/**
+ * Build a confirm form for deletion of search history.
+ */
+function customheaderimage_delete_confirm($form, &$form_state) {
+  $caption = '<p>' . t('This action cannot be undone.') . '</p>';
+  $heading = t('Are you sure you want to clear the header image for this page?');
+  $cancel_path = 'admin/config/customheaderimage';
+  $yes = t('Delete Image');
+  $no = t('Cancel');
+  return confirm_form($form, $heading, $cancel_path, $caption, $yes, $no);
+}
+
+/**
+ * Submit function for the confirm deletion form.
+ */
+function customheaderimage_delete_confirm_submit($form, &$form_state) {
+  //variable_del('input_search_history');
+  customheaderimage_remove_rule(customheaderimage_get_last_argument());
+  drupal_set_message('This path specific header image has been cleared.');
+}
 
 
 /********************************************************************
@@ -372,4 +419,8 @@ function customheaderimage_slashtodash($string) {
 }
 function customheaderimage_dashtoslash($string) {
   return str_replace('--', '/', $string);
+}
+function customheaderimage_get_last_argument() {
+  $q = $_GET['q'];
+  return customheaderimage_dashtoslash(array_pop(explode('/', $q)));
 }

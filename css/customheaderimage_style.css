@@ -1,8 +1,3 @@
-/*body #header { background-image: url('/sites/default/files/IMAG0331.jpg'); }
-*/
-.page-node-1 #header { background-image: url('/sites/default/files/IMAG0206.jpg'); }
-.page-node-2 #header { background-image: url('cats'); }
-
 .page-node-3 #header { background-image: url('/sites/default/files/IMAG0331.jpg'); }
 .page-a-new-view #header { background-image: url('/sites/default/files/IMAG0340.jpg'); }
 .page-nested-this-is-a-nested-view #header { background-image: url('/sites/default/files/IMAG0328.jpg'); }

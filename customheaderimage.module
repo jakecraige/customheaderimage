@@ -50,6 +50,14 @@ function customheaderimage_menu() {
     'file' => 'customheaderimage.admin.inc',
     'file path' => drupal_get_path('module', 'customheaderimage'),
   );
+  $items['admin/config/customheaderimage/delete'] = array(
+    'title' => 'Delete Header Image',
+    'description' => 'Delete specific path image',
+    'page callback' => 'customheaderimage_delete',
+    'access arguments' => array('administer customheaderimage'),
+    'file' => 'customheaderimage.admin.inc',
+    'file path' => drupal_get_path('module', 'customheaderimage'),
+  );
   return $items;
 }
 /*$items['admin/config/customheaderimage/global'] = array(
