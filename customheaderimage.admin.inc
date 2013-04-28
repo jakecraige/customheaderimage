@@ -65,13 +65,17 @@ function customheaderimage_create_table($paths) {
   $header = array(
     'title' => t('Title'),
     'path'     => t('Path'),
+    'image'    => t('Image'),
     'operations'    => t('Operations'),
   );
   $rows = array();
   foreach ($paths as $title=>$path) {
+    $base_path = variable_get('file_public_path', conf_path() . '/files');
+    $image = customheaderimage_image_name($path);
     $rows[] = array(
                 'title' => l($title, $path),
                 'path' => $path,
+                'image' => l($image, $base_path.'/'.$image),
                 'operations'
                     => l('Edit', 'admin/config/customheaderimage/edit/'
                                   .customheaderimage_slashtodash($path))
@@ -165,7 +169,8 @@ function customheaderimage_get_view_paths() {
  * @return [string]       [Name of view assoc with that path]
  */
 function customheaderimage_name_from_view_path($path) {
-  $arr = array_reverse(explode('/', $path));
+  $explode = explode('/', $path);
+  $arr = array_reverse($explode);
   return $arr[0];
 }
 
@@ -206,6 +211,13 @@ function customheaderimage_edit_image_form($form, &$form_submit) {
             .l('Click here to delete global default',
                 'admin/config/customheaderimage/delete/global')
             .'</p>';
+     // $image = customheaderimage_image_name('global');
+      if($image = customheaderimage_image_name('global')) {
+        $base_path = variable_get('file_public_path', conf_path() . '/files');
+        $html .= '<p>'.t('Your current image is: ')
+                    .l($image, $base_path.'/'.$image)
+                  .'</p>';
+      }
   }
   else {
     $html .= '<p>'.
@@ -261,7 +273,8 @@ function customheaderimage_edit_image_form_submit($form, &$form_state) {
   file_save($file);
   $base_path = '/'.variable_get('file_public_path', conf_path() . '/files');
   $new_image_path = $base_path.'/'.$file->filename;
-  $page_path = array_pop(explode('/', $_GET['q']));
+  $explode = explode('/', $_GET['q']);
+  $page_path = array_pop($explode);
   $page_path = customheaderimage_dashtoslash($page_path);
 
   $global = preg_match('|/global$|', $_GET['q']);
@@ -381,6 +394,13 @@ function customheaderimage_edit_image_form_submit($form, &$form_state) {
     }
     return FALSE;
   }
+  function customheaderimage_image_name($page_path) {
+    $path = drupal_get_path('module', 'customheaderimage') .'/css/customheaderimage_style.css';
+    $class = customheaderimage_get_class($page_path);
+    $image_path = customheaderimage_check_rule($class, $path);
+    $explode = explode('/', $image_path);
+    return array_pop($explode);
+  }
 
 /********************************************************************
 Delete rule functinos below
@@ -425,5 +445,6 @@ function customheaderimage_dashtoslash($string) {
   return str_replace('--', '/', $string);
 }
 function customheaderimage_get_last_argument() {
-  return customheaderimage_dashtoslash(array_pop(explode('/', $_GET['q'])));
+  $explode = explode('/', $_GET['q']);
+  return customheaderimage_dashtoslash(array_pop($explode));
 }
