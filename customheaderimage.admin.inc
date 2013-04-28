@@ -81,13 +81,14 @@ function customheaderimage_create_table($paths) {
                 'path' => $path,
                 'image' => l($image, FILES_PATH . '/' . $image),
                 'operations'
-                    => l(t('Edit'), 'admin/config/customheaderimage/edit/'
+                    => l(t('Edit'), MODULE_CONFIG_BASE_PATH . '/edit/'
                                   . customheaderimage_slashtodash($path)),
     );
     if ($image) {
-      $rows[$count]['operations'] .= '<span class="customheaderimage_delete"> | ' . l(t('Delete'), 'admin/config/customheaderimage/delete/'
-                             . customheaderimage_slashtodash($path))
-                              .'</span>';
+      $rows[$count]['operations'] .= '<span class="customheaderimage_delete"> | '
+                                    . l(t('Delete'), MODULE_CONFIG_BASE_PATH . '/delete/'
+                                    . customheaderimage_slashtodash($path))
+                                    .'</span>';
     }
     $count++;
   }
@@ -223,7 +224,7 @@ function customheaderimage_edit_image_form($form, &$form_submit) {
       if ($image = customheaderimage_image_name('global')) {
         $html .= '<p>'
                   . l(t('Click here to delete global default'),
-                      'admin/config/customheaderimage/delete/global')
+                      MODULE_CONFIG_BASE_PATH.'/delete/global')
                   . '</p>' .
                   '<p>' . t('Your current image is:') . ' '
                      . l($image, FILES_PATH . '/' . $image)
@@ -469,7 +470,7 @@ function customheaderimage_delete() {
 function customheaderimage_delete_confirm($form, &$form_state) {
   $caption = '<p>' . t('This action cannot be undone.') . '</p>';
   $heading = t('Are you sure you want to clear the header image for this page?');
-  $cancel_path = 'admin/config/customheaderimage';
+  $cancel_path = MODULE_CONFIG_BASE_PATH;
   $yes = t('Delete Image');
   $no = t('Cancel');
 

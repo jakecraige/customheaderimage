@@ -16,6 +16,7 @@ function customheaderimage_init() {
   define('ADMIN_CSS_PATH', drupal_get_path('module', 'customheaderimage') . '/css/customheaderimage_admin_style.css');
   define('FILES_PATH', variable_get('file_public_path', conf_path() . '/files'));
   define('MODULE_PATH', drupal_get_path('module', 'customheaderimage'));
+  define('MODULE_CONFIG_BASE_PATH', 'admin/config/media/customheaderimage');
 
   drupal_add_css(CSS_PATH, array('group' => CSS_DEFAULT, 'every_page' => TRUE));
   drupal_add_css(ADMIN_CSS_PATH, array('group' => CSS_DEFAULT, 'every_page' => TRUE));
@@ -27,20 +28,20 @@ function customheaderimage_init() {
  */
 function customheaderimage_menu() {
   // Module settings.
-  $items['admin/config/customheaderimage'] = array(
+  $items['admin/config/media/customheaderimage'] = array(
     'title' => 'Custom Header Image',
-    'description' => 'Configuration for path specific header imagesn',
+    'description' => 'Configuration for path specific header images. Suppports pages and views.',
     'page callback' => 'customheaderimage_display_pathspecific',
     'access arguments' => array('administer customheaderimage'),
     'file' => 'customheaderimage.admin.inc',
     'file path' => MODULE_PATH
   );
-  $items['admin/config/customheaderimage/default'] = array(
+  $items['admin/config/media/customheaderimage/default'] = array(
     'title' => 'Path Specific',
     'type' => MENU_DEFAULT_LOCAL_TASK,
     'weight' => -10,
   );
-  $items['admin/config/customheaderimage/global'] = array(
+  $items['admin/config/media/customheaderimage/global'] = array(
     'title' => 'Global',
     'description' => 'Configuration for global default headers',
     'type' => MENU_LOCAL_TASK,
@@ -50,7 +51,7 @@ function customheaderimage_menu() {
     'file' => 'customheaderimage.admin.inc',
     'file path' => MODULE_PATH
   );
-  $items['admin/config/customheaderimage/edit'] = array(
+  $items['admin/config/media/customheaderimage/edit'] = array(
     'title' => 'Edit',
     'description' => 'Edit the header image associated with this path',
     'page callback' => 'drupal_get_form',
@@ -60,7 +61,7 @@ function customheaderimage_menu() {
     'file' => 'customheaderimage.admin.inc',
     'file path' => MODULE_PATH
   );
-  $items['admin/config/customheaderimage/delete'] = array(
+  $items['admin/config/media/customheaderimage/delete'] = array(
     'type' => MENU_CALLBACK,
     'title' => 'Delete Header Image',
     'description' => 'Delete specific path image',
