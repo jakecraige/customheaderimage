@@ -12,8 +12,11 @@
 * Implements hook_init().
 */
 function customheaderimage_init() {
-  $css_path = drupal_get_path('module', 'customheaderimage') . '/css/customheaderimage_style.css';
-  drupal_add_css($css_path, array('group' => CSS_DEFAULT, 'every_page' => TRUE));
+  define('CSS_PATH', drupal_get_path('module', 'customheaderimage') . '/css/customheaderimage_style.css');
+  define('FILES_PATH', variable_get('file_public_path', conf_path() . '/files'));
+  define('MODULE_PATH', drupal_get_path('module', 'customheaderimage'));
+
+  drupal_add_css(CSS_PATH, array('group' => CSS_DEFAULT, 'every_page' => TRUE));
 }
 
 /**
@@ -27,7 +30,7 @@ function customheaderimage_menu() {
     'page callback' => 'customheaderimage_display_pathspecific',
     'access arguments' => array('administer customheaderimage'),
     'file' => 'customheaderimage.admin.inc',
-    'file path' => drupal_get_path('module', 'customheaderimage'),
+    'file path' => MODULE_PATH
   );
   $items['admin/config/customheaderimage/default'] = array(
     'title' => 'Path Specific',
@@ -42,7 +45,7 @@ function customheaderimage_menu() {
     'page arguments' => array('customheaderimage_edit_image_form'),
     'access callback' => TRUE,
     'file' => 'customheaderimage.admin.inc',
-    'file path' => drupal_get_path('module', 'customheaderimage'),
+    'file path' => MODULE_PATH
   );
   $items['admin/config/customheaderimage/edit'] = array(
     'title' => 'Edit',
@@ -52,7 +55,7 @@ function customheaderimage_menu() {
     'access callback' => TRUE,
     'type' => MENU_CALLBACK,
     'file' => 'customheaderimage.admin.inc',
-    'file path' => drupal_get_path('module', 'customheaderimage'),
+    'file path' => MODULE_PATH
   );
   $items['admin/config/customheaderimage/delete'] = array(
     'type' => MENU_CALLBACK,
@@ -61,7 +64,7 @@ function customheaderimage_menu() {
     'page callback' => 'customheaderimage_delete',
     'access arguments' => array('administer customheaderimage'),
     'file' => 'customheaderimage.admin.inc',
-    'file path' => drupal_get_path('module', 'customheaderimage'),
+    'file path' => MODULE_PATH
   );
   return $items;
 }

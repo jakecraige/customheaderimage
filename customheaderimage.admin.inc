@@ -75,12 +75,12 @@ function customheaderimage_create_table($paths) {
   $rows = array();
   $count = 0;
   foreach ($paths as $title => $path) {
-    $base_path = variable_get('file_public_path', conf_path() . '/files');
+    //$base_path = variable_get('file_public_path', conf_path() . '/files');
     $image = customheaderimage_image_name($path);
     $rows[] = array(
                 'title' => l($title, $path),
                 'path' => $path,
-                'image' => l($image, $base_path . '/' . $image),
+                'image' => l($image, FILES_PATH . '/' . $image),
                 'operations'
                     => l(t('Edit'), 'admin/config/customheaderimage/edit/'
                                   . customheaderimage_slashtodash($path)),
@@ -137,7 +137,7 @@ function customheaderimage_get_page_paths() {
 }
 
 /**
- * Returns the Node ID from the path
+ * Returns the Node ID from the path to node
  * @param  [string] $string [ex: node/12]
  * @return [int]         [ex: 12]
  */
@@ -147,6 +147,11 @@ function customheaderimage_get_nid_from_path($string) {
   return $string['0'];
 }
 
+/**
+ * Returns the Title of the page from the node ID
+ * @param  [string] $string [ex: 12]
+ * @return [string]         [ex: About]
+ */
 function customheaderimage_title_from_nid($nid) {
   $sql = "SELECT title FROM {node} WHERE nid=:nid";
   $title = db_query_range($sql, 0, 1, array(':nid' => $nid))->fetchAssoc();
@@ -205,7 +210,7 @@ function customheaderimage_title_from_view_name($name) {
  */
 function customheaderimage_edit_image_form($form, &$form_submit) {
   $html = '<h2>' . t('Upload Image') . '</h2>';
-  $base_path = variable_get('file_public_path', conf_path() . '/files');
+
   //Checking if we are on global page
   $global = preg_match('|/global$|', $_GET['q']);
   if ($global) {
@@ -221,7 +226,7 @@ function customheaderimage_edit_image_form($form, &$form_submit) {
                       'admin/config/customheaderimage/delete/global')
                   . '</p>' .
                   '<p>' . t('Your current image is:') . ' '
-                     . l($image, $base_path . '/' . $image)
+                     . l($image, FILES_PATH . '/' . $image)
                   . '</p>';
       }
   }
@@ -233,7 +238,7 @@ function customheaderimage_edit_image_form($form, &$form_submit) {
     $page_path = customheaderimage_get_last_argument();
     if ($image = customheaderimage_image_name($page_path)) {
       $html .= '<p>Your current image is: '
-                  . l($image, $base_path . '/' . $image)
+                  . l($image, FILES_PATH . '/' . $image)
                 . '</p>';
     }
   }
@@ -283,8 +288,8 @@ function customheaderimage_edit_image_form_submit($form, &$form_state) {
   $file->status = FILE_STATUS_PERMANENT;
   // Save file status.
   file_save($file);
-  $base_path = '/' . variable_get('file_public_path', conf_path() . '/files');
-  $new_image_path = $base_path . '/' . $file->filename;
+
+  $new_image_path = '/' . FILES_PATH . '/' . $file->filename;
   $explode = explode('/', $_GET['q']);
   $page_path = array_pop($explode);
   $page_path = customheaderimage_dashtoslash($page_path);
@@ -307,18 +312,15 @@ function customheaderimage_edit_image_form_submit($form, &$form_state) {
  * @param  [string] $image     [path to image uploaded]
  * @return [boolean]            [True if added. False for error]
  */
-  function customheaderimage_add_rule($page_path, $image) {
-    // path to CSS
-    $path = drupal_get_path('module', 'customheaderimage') . '/css/customheaderimage_style.css';
+  function customheaderimage_add_rule($page_path, $new_image_path) {
+
     $class = customheaderimage_get_class($page_path);
-
-    $style = " #header { background-image: url('$image'); }";
-
-    $css_class_exists = customheaderimage_class_exists($class, $path);
+    $style = " #header { background-image: url('$new_image_path'); }";
+    $css_class_exists = customheaderimage_class_exists($class);
 
     if (!$css_class_exists) {
       //No image path means that the css rule does not exist yet
-      if (file_put_contents($path, ($class . $style), FILE_APPEND)) {
+      if (file_put_contents(CSS_PATH, ($class . $style), FILE_APPEND)) {
         drupal_set_message(t('Added CSS Style'));
       }
       else {
@@ -326,10 +328,10 @@ function customheaderimage_edit_image_form_submit($form, &$form_state) {
       }
     }
     else { //Rule already exists, Should we update?
-      $image_path = customheaderimage_check_rule($class, $path);
-      if ($image_path != $image) {
-        //No the same img path so Update path
-        customheaderimage_update_image($class, $path, $image, $image_path);
+      $old_image_path = customheaderimage_check_rule($class);
+      if ($old_image_path != $new_image_path) {
+        //Not have the same img path so Update path
+        customheaderimage_update_image($class, $new_image_path, $old_image_path);
       }
     }
   }
@@ -351,9 +353,9 @@ function customheaderimage_edit_image_form_submit($form, &$form_state) {
     }
       return $class;
   }
-  function customheaderimage_class_exists($class, $file_path) {
-    $file = file_get_contents($file_path);
-    if (stristr($file, $class)) {
+  function customheaderimage_class_exists($class) {
+    $file_text = file_get_contents(CSS_PATH);
+    if (stristr($file_text, $class)) {
       return TRUE;
     }
     return FALSE;
@@ -364,26 +366,25 @@ function customheaderimage_edit_image_form_submit($form, &$form_state) {
    * @param  [string] $class [class to check]
    * @return [string]        [img path]
    */
-  function customheaderimage_check_rule($class, $file_path) {
-    $file = file_get_contents($file_path);
-    if (stristr($file, $class)) {
-      //File already has rule
-      ////.page-node-1 #header\{ background-image: url\('([a-z/_0-9.]+)
+  function customheaderimage_check_rule($class) {
+    $file_text = file_get_contents(CSS_PATH);
+    if (stristr($file_text, $class)) {
+      //File already has rule so we will return the image path
       $string = preg_match(
                   "|$class #header \{ background-image: url\('([a-zA-Z/_0-9.\s]+)|"
-                  , $file, $matches);
+                  , $file_text, $matches);
       $image_path = $matches[1];
       return $image_path;
     }
     return FALSE;
   }
-  function customheaderimage_update_image($class, $file_path, $new_image, $old_image) {
-    $file = file_get_contents($file_path);
+  function customheaderimage_update_image($class, $new_image, $old_image) {
+    $file_text = file_get_contents(CSS_PATH);
     $new_rule =  $class . " #header { background-image: url('$new_image'); }";
     $old_rule =  $class . " #header { background-image: url('$old_image'); }";
 
-    $file = str_replace($old_rule, $new_rule, $file);
-    if (file_put_contents($file_path, $file)) {
+    $file_text = str_replace($old_rule, $new_rule, $file_text);
+    if (file_put_contents(CSS_PATH, $file_text)) {
       drupal_set_message(t('Updated Header Image.'));
       return TRUE;
     }
@@ -391,11 +392,10 @@ function customheaderimage_edit_image_form_submit($form, &$form_state) {
   }
 
   function customheaderimage_remove_rule($page_path) {
-    $path = drupal_get_path('module', 'customheaderimage') . '/css/customheaderimage_style.css';
     $class = customheaderimage_get_class($page_path);
 
-    if (customheaderimage_class_exists($class, $path)) {
-      $image_path = customheaderimage_check_rule($class, $path);
+    if (customheaderimage_class_exists($class)) {
+      $image_path = customheaderimage_check_rule($class);
       $file = file_get_contents($path);
       $rule =  $class . " #header { background-image: url('$image_path'); }";
 
@@ -407,9 +407,8 @@ function customheaderimage_edit_image_form_submit($form, &$form_state) {
     return FALSE;
   }
   function customheaderimage_image_name($page_path) {
-    $path = drupal_get_path('module', 'customheaderimage') . '/css/customheaderimage_style.css';
     $class = customheaderimage_get_class($page_path);
-    $image_path = customheaderimage_check_rule($class, $path);
+    $image_path = customheaderimage_check_rule($class);
     $explode = explode('/', $image_path);
     return array_pop($explode);
   }
