@@ -8,7 +8,7 @@
  * Processing is done in the customheaderimage.admin.inc file
  *
  * Known bugs:
- * Taxonomy terms pulling incorrect URL, not the node
+ * Taxonomy terms pulling incorrect URL and breaking it.
  * Creating duplicate images on multiple uploads
  */
 
