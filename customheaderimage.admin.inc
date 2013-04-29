@@ -485,7 +485,7 @@ function customheaderimage_delete_confirm_submit($form, &$form_state) {
     drupal_set_message(t('This path specific header image has been cleared.'));
   }
   else {
-    drupal_set_message(t('Error deleting this header image rule.', 'error'));
+    drupal_set_message(t('Error deleting this header image rule.'), 'error');
   }
 }
 
