@@ -224,7 +224,7 @@ function customheaderimage_edit_image_form($form, &$form_submit) {
       if ($image = customheaderimage_image_name('global')) {
         $html .= '<p>'
                   . l(t('Click here to delete global default'),
-                      MODULE_CONFIG_BASE_PATH.'/delete/global')
+                      MODULE_CONFIG_BASE_PATH . '/delete/global')
                   . '</p>' .
                   '<p>' . t('Your current image is:') . ' '
                      . l($image, FILES_PATH . '/' . $image)
