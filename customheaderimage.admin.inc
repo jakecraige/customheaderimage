@@ -303,7 +303,11 @@ function customheaderimage_edit_image_form_submit($form, &$form_state) {
   $explode = explode('/', $_GET['q']);
   $page_path = array_pop($explode);
   $page_path = customheaderimage_dashtoslash($page_path);
+<<<<<<< HEAD
+
+=======
   dpm($new_image_path);
+>>>>>>> dd9fe8cf3dddf10d47be21447a0333d789c3ef0c
   $global = preg_match('|/global$|', $_GET['q']);
   customheaderimage_add_rule($page_path, $new_image_path);
 
@@ -396,7 +400,11 @@ function customheaderimage_edit_image_form_submit($form, &$form_state) {
     if (stristr($file_text, $class)) {
       //File already has rule so we will return the image path
       $string = preg_match(
+<<<<<<< HEAD
+                  "|$class #header \{ background-image: url\('([a-zA-Z/_0-9.\s-]+)|"
+=======
                   "|$class #header \{ background-image: url\('([a-zA-Z/_0-9.\s]+)|"
+>>>>>>> dd9fe8cf3dddf10d47be21447a0333d789c3ef0c
                   , $file_text, $matches);
       $image_path = $matches[1];
       return $image_path;
@@ -424,7 +432,11 @@ function customheaderimage_edit_image_form_submit($form, &$form_state) {
    */
   function customheaderimage_remove_rule($page_path) {
     $class = customheaderimage_get_class($page_path);
+<<<<<<< HEAD
+
+=======
     dpm('class:'.$class);
+>>>>>>> dd9fe8cf3dddf10d47be21447a0333d789c3ef0c
     if (customheaderimage_class_exists($class)) {
       $image_path = customheaderimage_check_rule($class);
 
