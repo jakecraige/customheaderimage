@@ -6,6 +6,10 @@
  *
  * This is a small condensed .module file to increase performance. Heavy
  * Processing is done in the customheaderimage.admin.inc file
+ *
+ * Known bugs:
+ * Taxonomy terms pulling incorrect URL, not the node
+ * Creating duplicate images on multiple uploads
  */
 
 /**
