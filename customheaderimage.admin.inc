@@ -299,11 +299,11 @@ function customheaderimage_edit_image_form_submit($form, &$form_state) {
   // Save file status.
   file_save($file);
 
-  $new_image_path = '/' . FILES_PATH . '/' . $file->filename;
+  $new_image_path = base_path() . FILES_PATH . '/' . $file->filename;
   $explode = explode('/', $_GET['q']);
   $page_path = array_pop($explode);
   $page_path = customheaderimage_dashtoslash($page_path);
-
+  dpm($new_image_path);
   $global = preg_match('|/global$|', $_GET['q']);
   customheaderimage_add_rule($page_path, $new_image_path);
 
